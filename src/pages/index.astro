@@ -48,10 +48,22 @@ import Layout from "../layouts/Layout.astro";
 </Layout>
 
 <script>
+  /**
+   * Import the "prominent" and "average" functions from the "color.js" library.
+   * @requires {prominent} - A function that returns the most prominent colors in an image.
+   * @requires {average} - A function that returns the average color of an image.
+   */
   import { prominent, average } from "color.js";
 
   // prominent ------------------------------------------
 
+  /**
+   * Asynchronously gets the most prominent colors of the selected image and updates the background color of the "color" element and elements with the "primary" class.
+   * @async
+   * @function getColors
+   * @memberof globalThis
+   * @returns {Promise<void>} A promise that resolves when the function has finished executing.
+   */
   async function getColors() {
     const img = document.getElementById("img"); // get the image element
     const src = img.getAttribute("src"); // get the image source
@@ -60,6 +72,8 @@ import Layout from "../layouts/Layout.astro";
     /**
      * Get the most prominent colors of an image using the "prominent" function from the "color.js" library.
      * @param {string} src - The source URL of the image.
+     * @param {Object} options - An object containing options for the "prominent" function.
+     * @param {number} options.amount - The number of prominent colors to return.
      * @returns {Promise<Array>} A promise that resolves to an array of the most prominent colors in RGB format.
      */
     const colores: any = await prominent(src, { amount: 3 });
@@ -102,8 +116,21 @@ import Layout from "../layouts/Layout.astro";
         maxSum = sum;
       }
     }
+
+    /**
+     * Calculate the YIQ color contrast of the most colorful pixel and determine the text color to use.
+     * @param {Array} mostColorful - An array of the most colorful pixel in RGB format.
+     * @returns {string} The color to use for the text, either "black" or "white".
+     */
+    const r = mostColorful[0];
+    const g = mostColorful[1];
+    const b = mostColorful[2];
+    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+    const textColor = yiq >= 128 ? "black" : "white";
+
     // Update the background color of color principal
     color.style.backgroundColor = `rgb(${mostColorful[0]}, ${mostColorful[1]}, ${mostColorful[2]})`;
+    color.style.color = textColor;
 
     // obtener todos los elementos con la clase primary
     const elements = document.getElementsByClassName("primary");
@@ -117,6 +144,7 @@ import Layout from "../layouts/Layout.astro";
     Array.from(elements).forEach((element) => {
       if (element instanceof HTMLElement) {
         element.style.backgroundColor = `rgb(${mostColorful[0]}, ${mostColorful[1]}, ${mostColorful[2]})`;
+        element.style.color = textColor;
         element.style.transition = "background-color 0.3s ease"; // add transition effect
         element.addEventListener("mouseenter", () => {
           // add event listener for mouseenter
@@ -170,8 +198,18 @@ import Layout from "../layouts/Layout.astro";
     // obtener average de colores de una imagen
     const colores = await average(src);
 
+    /**
+     * Calculate the YIQ color contrast of the most colorful pixel and determine the text color to use.
+     * @param {Array} mostColorful - An array of the most colorful pixel in RGB format.
+     * @returns {string} The color to use for the text, either "black" or "white".
+     */
+    const r: any = colores[0];
+    const g: any = colores[1];
+    const b: any = colores[2];
+    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+    const textColor = yiq >= 128 ? "black" : "white";
+
     color4.style.backgroundColor = `rgb(${colores[0]}, ${colores[1]}, ${colores[2]})`;
-    const array = [colores[0], colores[1], colores[2]];
 
     // obtener todos los elementos con la clase primary
     const elements = document.getElementsByClassName("secundary");
@@ -180,6 +218,7 @@ import Layout from "../layouts/Layout.astro";
     Array.from(elements).forEach((element) => {
       if (element instanceof HTMLElement) {
         element.style.backgroundColor = `rgb(${colores[0]}, ${colores[1]}, ${colores[2]})`;
+        element.style.color = textColor;
         element.style.transition = "background-color 0.3s ease"; // add transition effect
         element.addEventListener("mouseenter", () => {
           // add event listener for mouseenter
