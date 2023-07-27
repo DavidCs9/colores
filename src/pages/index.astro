@@ -58,27 +58,40 @@ import Layout from "../layouts/Layout.astro";
     const src = img.getAttribute("src");
     const color = document.getElementById("color");
 
-    // obtener colores de una imagen
-    const colores = await prominent(src, { amount: 2 });
+    const colores: any = await prominent(src, { amount: 3 });
 
-    // if fondo es mayor a imagen
-    if (colores[0][0] === 0 && colores[0][1] === 0 && colores[0][2] === 0) {
-      color.style.backgroundColor = `rgb(${colores[1][0]}, ${colores[1][1]}, ${colores[1][2]})`;
-      // array with rgb values
-      array = [colores[1][0], colores[1][1], colores[1][2]];
-    }
-    // si imagen es mayor a fondo
-    else {
-      color.style.backgroundColor = `rgb(${colores[0][0]}, ${colores[0][1]}, ${colores[0][2]})`;
-      // array with rgb values
-      array = [colores[0][0], colores[0][1], colores[0][2]];
+    let mostColorful = colores[0];
+    let maxSum = mostColorful.reduce((acc, val) => acc + val, 0);
+
+    // Check if white is present
+    const whiteIndex = colores.findIndex(
+      (color) => color[0] === 255 && color[1] === 255 && color[2] === 255
+    );
+
+    if (whiteIndex !== -1) {
+      // If white is present, choose the second most colorful color
+      colores.splice(whiteIndex, 1);
+      mostColorful = colores[0];
+      maxSum = mostColorful.reduce((acc, val) => acc + val, 0);
     }
 
+    for (let i = 1; i < colores.length; i++) {
+      const sum = colores[i].reduce((acc, val) => acc + val, 0);
+      if (sum > maxSum) {
+        mostColorful = colores[i];
+        maxSum = sum;
+      }
+    }
+
+    array = mostColorful;
     // convert rgb to hexadecimal
     const hexColor = array.reduce((acc, curr) => {
       const hex = curr.toString(16);
       return acc + (hex.length === 1 ? "0" + hex : hex);
     }, "#");
+
+    // Update the background color of color principal
+    color.style.backgroundColor = hexColor;
 
     // convert hexadecimal to lighter hexadecimal
     const lightenHexColor = hexColor + "90";
@@ -171,7 +184,6 @@ import Layout from "../layouts/Layout.astro";
   // Get the input element and image element by their IDs
   const inputElement = document.getElementById("image-input");
   const imageElement = document.getElementById("img") as HTMLImageElement;
-
   // Add an event listener to the input element of principal
   inputElement.addEventListener("change", function () {
     // Ensure that a file was selected
