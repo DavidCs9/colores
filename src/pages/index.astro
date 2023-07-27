@@ -53,28 +53,48 @@ import Layout from "../layouts/Layout.astro";
   // prominent ------------------------------------------
 
   async function getColors() {
-    let array = [];
-    const img = document.getElementById("img");
-    const src = img.getAttribute("src");
-    const color = document.getElementById("color");
+    const img = document.getElementById("img"); // get the image element
+    const src = img.getAttribute("src"); // get the image source
+    const color = document.getElementById("color"); // get the color element
 
+    /**
+     * Get the most prominent colors of an image using the "prominent" function from the "color.js" library.
+     * @param {string} src - The source URL of the image.
+     * @returns {Promise<Array>} A promise that resolves to an array of the most prominent colors in RGB format.
+     */
     const colores: any = await prominent(src, { amount: 3 });
 
+    /**
+     * Find the most colorful pixel in the image by calculating the sum of RGB values for each pixel.
+     * @param {Array} colores - An array of color values in RGB format.
+     * @returns {Array} An array of the most colorful pixel in RGB format.
+     */
     let mostColorful = colores[0];
     let maxSum = mostColorful.reduce((acc, val) => acc + val, 0);
 
-    // Check if white is present
+    // Find the index of the white color in the array of colors.
     const whiteIndex = colores.findIndex(
       (color) => color[0] === 255 && color[1] === 255 && color[2] === 255
     );
 
+    /**
+     * If the image has a white color, remove it from the array of colors and update the most colorful pixel.
+     * @param {number} whiteIndex - The index of the white color in the array of colors.
+     * @param {Array} colores - An array of color values in RGB format.
+     * @param {Array} mostColorful - An array of the most colorful pixel in RGB format.
+     * @param {number} maxSum - The sum of RGB values for the most colorful pixel.
+     */
     if (whiteIndex !== -1) {
-      // If white is present, choose the second most colorful color
       colores.splice(whiteIndex, 1);
       mostColorful = colores[0];
       maxSum = mostColorful.reduce((acc, val) => acc + val, 0);
     }
 
+    /**
+     * Find the most colorful pixel in the image by calculating the sum of RGB values for each pixel.
+     * @param {Array} colores - An array of color values in RGB format.
+     * @returns {Array} An array of the most colorful pixel in RGB format.
+     */
     for (let i = 1; i < colores.length; i++) {
       const sum = colores[i].reduce((acc, val) => acc + val, 0);
       if (sum > maxSum) {
@@ -82,45 +102,54 @@ import Layout from "../layouts/Layout.astro";
         maxSum = sum;
       }
     }
-
-    array = mostColorful;
-    // convert rgb to hexadecimal
-    const hexColor = array.reduce((acc, curr) => {
-      const hex = curr.toString(16);
-      return acc + (hex.length === 1 ? "0" + hex : hex);
-    }, "#");
-
     // Update the background color of color principal
-    color.style.backgroundColor = hexColor;
-
-    // convert hexadecimal to lighter hexadecimal
-    const lightenHexColor = hexColor + "90";
+    color.style.backgroundColor = `rgb(${mostColorful[0]}, ${mostColorful[1]}, ${mostColorful[2]})`;
 
     // obtener todos los elementos con la clase primary
     const elements = document.getElementsByClassName("primary");
 
-    // Update the background color of each element
+    /**
+     * Update the background color of each element with the most colorful pixel and add transition effect.
+     * Add event listeners for mouseenter and mouseleave to change the opacity of the background color.
+     * @param {Array} elements - An array of HTML elements to update the background color.
+     * @param {Array} mostColorful - An array of the most colorful pixel in RGB format.
+     */
     Array.from(elements).forEach((element) => {
       if (element instanceof HTMLElement) {
-        element.style.backgroundColor = hexColor;
+        element.style.backgroundColor = `rgb(${mostColorful[0]}, ${mostColorful[1]}, ${mostColorful[2]})`;
         element.style.transition = "background-color 0.3s ease"; // add transition effect
         element.addEventListener("mouseenter", () => {
           // add event listener for mouseenter
-          element.style.backgroundColor = lightenHexColor;
+          element.style.backgroundColor = `rgb(${mostColorful[0]}, ${mostColorful[1]}, ${mostColorful[2]}, 0.7)`;
         });
         element.addEventListener("mouseleave", () => {
           // add event listener for mouseleave
-          element.style.backgroundColor = hexColor;
+          element.style.backgroundColor = `rgb(${mostColorful[0]}, ${mostColorful[1]}, ${mostColorful[2]})`;
         });
       }
     });
   }
 
+  /**
+   * Call the "getColors" function to get the most prominent colors of the selected image.
+   */
   getColors();
 
+  /**
+   * Get the input element for selecting an image and assign it to the "inputElement" variable.
+   * @type {HTMLElement}
+   * @const
+   * @memberof globalThis
+   * @property {string} id - The ID of the input element.
+   */
   const inputElement = document.getElementById("image-input");
 
-  inputElement.addEventListener("change", async function () {
+  /**
+   * Add event listener to the input element to trigger the getColors function when a new image is selected.
+   * @param {Event} event - The event object.
+   * @async
+   */
+  inputElement.addEventListener("change", async function (event) {
     setTimeout(async () => {
       getColors();
     }, 10);
@@ -128,6 +157,11 @@ import Layout from "../layouts/Layout.astro";
   // --------------------------------------------------
   // average ------------------------------------------
 
+  /**
+   * Get the average color of an image and update the background color of the elements with the class "secundary".
+   * @async
+   * @function getAverage
+   */
   async function getAverage() {
     const color4 = document.getElementById("color4");
     const img = document.getElementById("img2");
@@ -139,30 +173,21 @@ import Layout from "../layouts/Layout.astro";
     color4.style.backgroundColor = `rgb(${colores[0]}, ${colores[1]}, ${colores[2]})`;
     const array = [colores[0], colores[1], colores[2]];
 
-    // convert rgb to hexadecimal
-    const hexColor: any = array.reduce((acc, curr) => {
-      const hex = curr.toString(16);
-      return acc + (hex.length === 1 ? "0" + hex : hex);
-    }, "#");
-
-    // convert hexadecimal to lighter hexadecimal
-    const lightenHexColor = hexColor + "90";
-
     // obtener todos los elementos con la clase primary
     const elements = document.getElementsByClassName("secundary");
 
     // Update the background color of each element
     Array.from(elements).forEach((element) => {
       if (element instanceof HTMLElement) {
-        element.style.backgroundColor = hexColor;
+        element.style.backgroundColor = `rgb(${colores[0]}, ${colores[1]}, ${colores[2]})`;
         element.style.transition = "background-color 0.3s ease"; // add transition effect
         element.addEventListener("mouseenter", () => {
           // add event listener for mouseenter
-          element.style.backgroundColor = lightenHexColor;
+          element.style.backgroundColor = `rgb(${colores[0]}, ${colores[1]}, ${colores[2]}, 0.8)`;
         });
         element.addEventListener("mouseleave", () => {
           // add event listener for mouseleave
-          element.style.backgroundColor = hexColor;
+          element.style.backgroundColor = `rgb(${colores[0]}, ${colores[1]}, ${colores[2]})`;
         });
       }
     });
@@ -172,12 +197,19 @@ import Layout from "../layouts/Layout.astro";
 
   const inputElementAvg = document.getElementById("image-input-avg");
 
-  inputElementAvg.addEventListener("change", async function () {
-    setTimeout(async () => {
-      getAverage();
-    }, 10);
-  });
-  // --------------------------------------------------
+  /**
+   * Add an event listener to the input element of average to update the background color of the elements with the class "secundary" with the average color of the selected image.
+   * @async
+   * @function inputElementAvgChange
+   */
+  inputElementAvg.addEventListener(
+    "change",
+    async function inputElementAvgChange() {
+      setTimeout(async () => {
+        getAverage();
+      }, 10);
+    }
+  );
 </script>
 
 <script>
