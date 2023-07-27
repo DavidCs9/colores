@@ -6,31 +6,42 @@ import Layout from "../layouts/Layout.astro";
   <h1 class="text-4xl font-semibold p-10 text-center">
     Prueba cambiar colores con imagenes
   </h1>
+  <!-- imagenes con inputs -->
   <main
     class="flex flex-col lg:flex-row justify-center gap-20 border-b border-b-gray-800 pb-10"
   >
+    <!-- color mas prominente -->
     <div class="text-center flex flex-col gap-2">
-      <h2 class="text-2xl">3 colores mas prominentes</h2>
+      <h2 class="text-2xl">Color mas prominente</h2>
       <img id="img" src="spotify.png" alt="" class="w-96 rounded m-auto" />
       <div class="flex gap-2">
         <input type="file" accept="image/*" id="image-input" />
-        <div id="color1" class="m-auto p-3 rounded text-white">
+        <div id="color" class="m-auto p-3 rounded text-white">
           color principal
         </div>
       </div>
     </div>
+    <!-- color promedio -->
     <div class="text-center flex flex-col gap-2">
-      <h2 class="text-2xl">Average</h2>
+      <h2 class="text-2xl">Color promedio</h2>
       <img id="img2" src="twitter.png" alt="" class="w-96 m-auto" />
       <div class="flex gap-2">
-        <div id="color4" class="m-auto p-3 rounded text-white">color 1</div>
+        <input type="file" accept="image/*" id="image-input-avg" />
+        <div id="color4" class="m-auto p-3 rounded text-white">
+          color Promedio
+        </div>
       </div>
     </div>
   </main>
-  <div class="flex flex-col gap-3">
-    <h2 class="text-3xl font-semibold text-center p-10">Prueba clases</h2>
+  <!-- pruebas -->
+  <h2 class="text-3xl font-semibold text-center p-10">Prueba clases</h2>
+  <div class="flex flex-col md:flex-row gap-3">
     <button
       class="w-40 m-auto py-3 rounded-md shadow-md font-semibold primary mb-10"
+      >Iniciar sesión</button
+    >
+    <button
+      class="w-40 m-auto py-3 rounded-md shadow-md font-semibold secundary mb-10"
       >Iniciar sesión</button
     >
   </div>
@@ -39,113 +50,129 @@ import Layout from "../layouts/Layout.astro";
 <script>
   import { prominent, average } from "color.js";
 
-  let array = [];
-  // prominent 3 colors
+  // prominent ------------------------------------------
 
-  const color1 = document.getElementById("color1");
+  async function getColors() {
+    let array = [];
+    const img = document.getElementById("img");
+    const src = img.getAttribute("src");
+    const color = document.getElementById("color");
 
-  const img = document.getElementById("img");
-  const src = img.getAttribute("src");
+    // obtener colores de una imagen
+    const colores = await prominent(src, { amount: 2 });
 
-  const colores = await prominent(src, { amount: 2 });
+    // if fondo es mayor a imagen
+    if (colores[0][0] === 0 && colores[0][1] === 0 && colores[0][2] === 0) {
+      color.style.backgroundColor = `rgb(${colores[1][0]}, ${colores[1][1]}, ${colores[1][2]})`;
+      // array with rgb values
+      array = [colores[1][0], colores[1][1], colores[1][2]];
+    }
+    // si imagen es mayor a fondo
+    else {
+      color.style.backgroundColor = `rgb(${colores[0][0]}, ${colores[0][1]}, ${colores[0][2]})`;
+      // array with rgb values
+      array = [colores[0][0], colores[0][1], colores[0][2]];
+    }
 
-  if (colores[0][0] === 0 && colores[0][1] === 0 && colores[0][2] === 0) {
-    color1.style.backgroundColor = `rgb(${colores[1][0]}, ${colores[1][1]}, ${colores[1][2]})`;
-    // array with rgb values
-    array = [colores[1][0], colores[1][1], colores[1][2]];
-  } else {
-    color1.style.backgroundColor = `rgb(${colores[0][0]}, ${colores[0][1]}, ${colores[0][2]})`;
-    // array with rgb values
-    array = [colores[0][0], colores[0][1], colores[0][2]];
+    // convert rgb to hexadecimal
+    const hexColor = array.reduce((acc, curr) => {
+      const hex = curr.toString(16);
+      return acc + (hex.length === 1 ? "0" + hex : hex);
+    }, "#");
+
+    // convert hexadecimal to lighter hexadecimal
+    const lightenHexColor = hexColor + "90";
+
+    // obtener todos los elementos con la clase primary
+    const elements = document.getElementsByClassName("primary");
+
+    // Update the background color of each element
+    Array.from(elements).forEach((element) => {
+      if (element instanceof HTMLElement) {
+        element.style.backgroundColor = hexColor;
+        element.style.transition = "background-color 0.3s ease"; // add transition effect
+        element.addEventListener("mouseenter", () => {
+          // add event listener for mouseenter
+          element.style.backgroundColor = lightenHexColor;
+        });
+        element.addEventListener("mouseleave", () => {
+          // add event listener for mouseleave
+          element.style.backgroundColor = hexColor;
+        });
+      }
+    });
   }
 
-  // convert rgb to hexadecimal
-  const hexColor = array.reduce((acc, curr) => {
-    const hex = curr.toString(16);
-    return acc + (hex.length === 1 ? "0" + hex : hex);
-  }, "#");
+  getColors();
 
-  const hexColorString = hexColor.toString();
-
-  // obtener todos los elementos con la clase primary
-  const changeablePrimaryElements = document.getElementsByClassName("primary");
-
-  // Update the background color of each element
-  Array.from(changeablePrimaryElements).forEach((element) => {
-    if (element instanceof HTMLElement) {
-      element.style.backgroundColor = hexColorString;
-    }
-  });
-
-  var inputElement = document.getElementById("image-input");
+  const inputElement = document.getElementById("image-input");
 
   inputElement.addEventListener("change", async function () {
-    console.log("cambio");
     setTimeout(async () => {
-      let array = [];
-      // prominent 3 colors
-
-      const color1 = document.getElementById("color1");
-
-      const img = document.getElementById("img");
-      const src = img.getAttribute("src");
-
-      console.log(src);
-
-      const colores = await prominent(src, { amount: 2 });
-
-      if (colores[0][0] === 0 && colores[0][1] === 0 && colores[0][2] === 0) {
-        color1.style.backgroundColor = `rgb(${colores[1][0]}, ${colores[1][1]}, ${colores[1][2]})`;
-        // array with rgb values
-        array = [colores[1][0], colores[1][1], colores[1][2]];
-      } else {
-        color1.style.backgroundColor = `rgb(${colores[0][0]}, ${colores[0][1]}, ${colores[0][2]})`;
-        // array with rgb values
-        array = [colores[0][0], colores[0][1], colores[0][2]];
-      }
-
-      // convert rgb to hexadecimal
-      const hexColor = array.reduce((acc, curr) => {
-        const hex = curr.toString(16);
-        return acc + (hex.length === 1 ? "0" + hex : hex);
-      }, "#");
-
-      const hexColorString = hexColor.toString();
-
-      // obtener todos los elementos con la clase primary
-      const changeablePrimaryElements =
-        document.getElementsByClassName("primary");
-
-      // Update the background color of each element
-      Array.from(changeablePrimaryElements).forEach((element) => {
-        if (element instanceof HTMLElement) {
-          element.style.backgroundColor = hexColorString;
-        }
-      });
-      console.log("cambio2");
+      getColors();
     }, 10);
   });
-
   // --------------------------------------------------
-  // average
+  // average ------------------------------------------
 
-  const color4 = document.getElementById("color4");
+  async function getAverage() {
+    const color4 = document.getElementById("color4");
+    const img = document.getElementById("img2");
+    const src = img.getAttribute("src");
 
-  const img2 = document.getElementById("img2");
-  const src2 = img2.getAttribute("src");
+    // obtener average de colores de una imagen
+    const colores = await average(src);
 
-  const colores2 = await average(src2);
+    color4.style.backgroundColor = `rgb(${colores[0]}, ${colores[1]}, ${colores[2]})`;
+    const array = [colores[0], colores[1], colores[2]];
 
-  color4.style.backgroundColor = `rgb(${colores2[0]}, ${colores2[1]}, ${colores2[2]})`;
+    // convert rgb to hexadecimal
+    const hexColor: any = array.reduce((acc, curr) => {
+      const hex = curr.toString(16);
+      return acc + (hex.length === 1 ? "0" + hex : hex);
+    }, "#");
 
+    // convert hexadecimal to lighter hexadecimal
+    const lightenHexColor = hexColor + "90";
+
+    // obtener todos los elementos con la clase primary
+    const elements = document.getElementsByClassName("secundary");
+
+    // Update the background color of each element
+    Array.from(elements).forEach((element) => {
+      if (element instanceof HTMLElement) {
+        element.style.backgroundColor = hexColor;
+        element.style.transition = "background-color 0.3s ease"; // add transition effect
+        element.addEventListener("mouseenter", () => {
+          // add event listener for mouseenter
+          element.style.backgroundColor = lightenHexColor;
+        });
+        element.addEventListener("mouseleave", () => {
+          // add event listener for mouseleave
+          element.style.backgroundColor = hexColor;
+        });
+      }
+    });
+  }
+
+  getAverage();
+
+  const inputElementAvg = document.getElementById("image-input-avg");
+
+  inputElementAvg.addEventListener("change", async function () {
+    setTimeout(async () => {
+      getAverage();
+    }, 10);
+  });
   // --------------------------------------------------
 </script>
+
 <script>
   // Get the input element and image element by their IDs
-  var inputElement = document.getElementById("image-input");
-  var imageElement = document.getElementById("img") as HTMLImageElement;
+  const inputElement = document.getElementById("image-input");
+  const imageElement = document.getElementById("img") as HTMLImageElement;
 
-  // Add an event listener to the input element
+  // Add an event listener to the input element of principal
   inputElement.addEventListener("change", function () {
     // Ensure that a file was selected
     if (
@@ -154,15 +181,43 @@ import Layout from "../layouts/Layout.astro";
       inputElement.files[0]
     ) {
       // Get the selected file (should be an image)
-      var selectedFile = inputElement.files[0];
+      const selectedFile = inputElement.files[0];
 
       // Create a FileReader to read the selected image
-      var reader = new FileReader();
+      const reader = new FileReader();
 
       // Set up the FileReader onload event to update the image src when the file is read
       reader.onload = function (event) {
         const src: string = event.target.result as string;
         imageElement.src = src;
+      };
+
+      // Read the selected file as a data URL (base64 encoded string)
+      reader.readAsDataURL(selectedFile);
+    }
+  });
+
+  // Get the input element and image element by their IDs
+  const inputElementAvg = document.getElementById("image-input-avg");
+  const imageElementAvg = document.getElementById("img2") as HTMLImageElement;
+  // Add an event listener to the input element of avg
+  inputElementAvg.addEventListener("change", function () {
+    // Ensure that a file was selected
+    if (
+      inputElementAvg instanceof HTMLInputElement &&
+      inputElementAvg.files &&
+      inputElementAvg.files[0]
+    ) {
+      // Get the selected file (should be an image)
+      const selectedFile = inputElementAvg.files[0];
+
+      // Create a FileReader to read the selected image
+      const reader = new FileReader();
+
+      // Set up the FileReader onload event to update the image src when the file is read
+      reader.onload = function (event) {
+        const src: string = event.target.result as string;
+        imageElementAvg.src = src;
       };
 
       // Read the selected file as a data URL (base64 encoded string)
