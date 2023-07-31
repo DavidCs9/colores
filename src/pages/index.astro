@@ -49,14 +49,13 @@ import Layout from "../layouts/Layout.astro";
 
 <script>
   import ChromeTheme from "chrome-theme";
+  
   const themePrimary = new ChromeTheme('spotify.png', 'primary');
   themePrimary.getMainColor()
 
   const themeSecundary = new ChromeTheme('twitter.png', 'secundary');
   themeSecundary.getAverageColor()
 
-
-// inputs dinamicos
   const imageElement = document.getElementById("img") as HTMLImageElement;
   const inputElement = document.getElementById("image-input");
 
