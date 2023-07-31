@@ -16,7 +16,7 @@ import Layout from "../layouts/Layout.astro";
       <img id="img" src="spotify.png" alt="" class="w-96 rounded m-auto" />
       <div class="flex gap-2">
         <input type="file" accept="image/*" id="image-input" />
-        <div id="color" class="m-auto p-3 rounded text-white">
+        <div id="color" class="m-auto p-3 rounded text-white primary">
           color principal
         </div>
       </div>
@@ -27,7 +27,7 @@ import Layout from "../layouts/Layout.astro";
       <img id="img2" src="twitter.png" alt="" class="w-96 m-auto" />
       <div class="flex gap-2">
         <input type="file" accept="image/*" id="image-input-avg" />
-        <div id="color4" class="m-auto p-3 rounded text-white">
+        <div id="color4" class="m-auto p-3 rounded text-white secundary">
           color Promedio
         </div>
       </div>
@@ -42,230 +42,85 @@ import Layout from "../layouts/Layout.astro";
     >
     <button
       class="w-40 m-auto py-3 rounded-md shadow-md font-semibold secundary mb-10"
-      >Iniciar sesión</button
+      >Crear cuenta</button
     >
   </div>
 </Layout>
 
 <script>
-  import { prominent, average } from "color.js";
+  import ChromeTheme from "chrome-theme";
+  const themePrimary = new ChromeTheme('spotify.png', 'primary');
+  themePrimary.getMainColor()
 
-  // prominent ------------------------------------------
+  const themeSecundary = new ChromeTheme('twitter.png', 'secundary');
+  themeSecundary.getAverageColor()
 
-  async function getColors() {
-    const img = document.getElementById("img"); // get the image element
-    const src = img.getAttribute("src"); // get the image source
-    const color = document.getElementById("color"); // get the color element
 
-    /**
-     * Get the most prominent colors of an image using the "prominent" function from the "color.js" library.
-     * @param {string} src - The source URL of the image.
-     * @returns {Promise<Array>} A promise that resolves to an array of the most prominent colors in RGB format.
-     */
-    const colores: any = await prominent(src, { amount: 3 });
-
-    /**
-     * Find the most colorful pixel in the image by calculating the sum of RGB values for each pixel.
-     * @param {Array} colores - An array of color values in RGB format.
-     * @returns {Array} An array of the most colorful pixel in RGB format.
-     */
-    let mostColorful = colores[0];
-    let maxSum = mostColorful.reduce((acc, val) => acc + val, 0);
-
-    // Find the index of the white color in the array of colors.
-    const whiteIndex = colores.findIndex(
-      (color) => color[0] === 255 && color[1] === 255 && color[2] === 255
-    );
-
-    /**
-     * If the image has a white color, remove it from the array of colors and update the most colorful pixel.
-     * @param {number} whiteIndex - The index of the white color in the array of colors.
-     * @param {Array} colores - An array of color values in RGB format.
-     * @param {Array} mostColorful - An array of the most colorful pixel in RGB format.
-     * @param {number} maxSum - The sum of RGB values for the most colorful pixel.
-     */
-    if (whiteIndex !== -1) {
-      colores.splice(whiteIndex, 1);
-      mostColorful = colores[0];
-      maxSum = mostColorful.reduce((acc, val) => acc + val, 0);
-    }
-
-    /**
-     * Find the most colorful pixel in the image by calculating the sum of RGB values for each pixel.
-     * @param {Array} colores - An array of color values in RGB format.
-     * @returns {Array} An array of the most colorful pixel in RGB format.
-     */
-    for (let i = 1; i < colores.length; i++) {
-      const sum = colores[i].reduce((acc, val) => acc + val, 0);
-      if (sum > maxSum) {
-        mostColorful = colores[i];
-        maxSum = sum;
-      }
-    }
-    // Update the background color of color principal
-    color.style.backgroundColor = `rgb(${mostColorful[0]}, ${mostColorful[1]}, ${mostColorful[2]})`;
-
-    // obtener todos los elementos con la clase primary
-    const elements = document.getElementsByClassName("primary");
-
-    /**
-     * Update the background color of each element with the most colorful pixel and add transition effect.
-     * Add event listeners for mouseenter and mouseleave to change the opacity of the background color.
-     * @param {Array} elements - An array of HTML elements to update the background color.
-     * @param {Array} mostColorful - An array of the most colorful pixel in RGB format.
-     */
-    Array.from(elements).forEach((element) => {
-      if (element instanceof HTMLElement) {
-        element.style.backgroundColor = `rgb(${mostColorful[0]}, ${mostColorful[1]}, ${mostColorful[2]})`;
-        element.style.transition = "background-color 0.3s ease"; // add transition effect
-        element.addEventListener("mouseenter", () => {
-          // add event listener for mouseenter
-          element.style.backgroundColor = `rgb(${mostColorful[0]}, ${mostColorful[1]}, ${mostColorful[2]}, 0.7)`;
-        });
-        element.addEventListener("mouseleave", () => {
-          // add event listener for mouseleave
-          element.style.backgroundColor = `rgb(${mostColorful[0]}, ${mostColorful[1]}, ${mostColorful[2]})`;
-        });
-      }
-    });
-  }
-
-  /**
-   * Call the "getColors" function to get the most prominent colors of the selected image.
-   */
-  getColors();
-
-  /**
-   * Get the input element for selecting an image and assign it to the "inputElement" variable.
-   * @type {HTMLElement}
-   * @const
-   * @memberof globalThis
-   * @property {string} id - The ID of the input element.
-   */
-  const inputElement = document.getElementById("image-input");
-
-  /**
-   * Add event listener to the input element to trigger the getColors function when a new image is selected.
-   * @param {Event} event - The event object.
-   * @async
-   */
-  inputElement.addEventListener("change", async function (event) {
-    setTimeout(async () => {
-      getColors();
-    }, 10);
-  });
-  // --------------------------------------------------
-  // average ------------------------------------------
-
-  /**
-   * Get the average color of an image and update the background color of the elements with the class "secundary".
-   * @async
-   * @function getAverage
-   */
-  async function getAverage() {
-    const color4 = document.getElementById("color4");
-    const img = document.getElementById("img2");
-    const src = img.getAttribute("src");
-
-    // obtener average de colores de una imagen
-    const colores = await average(src);
-
-    color4.style.backgroundColor = `rgb(${colores[0]}, ${colores[1]}, ${colores[2]})`;
-    const array = [colores[0], colores[1], colores[2]];
-
-    // obtener todos los elementos con la clase primary
-    const elements = document.getElementsByClassName("secundary");
-
-    // Update the background color of each element
-    Array.from(elements).forEach((element) => {
-      if (element instanceof HTMLElement) {
-        element.style.backgroundColor = `rgb(${colores[0]}, ${colores[1]}, ${colores[2]})`;
-        element.style.transition = "background-color 0.3s ease"; // add transition effect
-        element.addEventListener("mouseenter", () => {
-          // add event listener for mouseenter
-          element.style.backgroundColor = `rgb(${colores[0]}, ${colores[1]}, ${colores[2]}, 0.8)`;
-        });
-        element.addEventListener("mouseleave", () => {
-          // add event listener for mouseleave
-          element.style.backgroundColor = `rgb(${colores[0]}, ${colores[1]}, ${colores[2]})`;
-        });
-      }
-    });
-  }
-
-  getAverage();
-
-  const inputElementAvg = document.getElementById("image-input-avg");
-
-  /**
-   * Add an event listener to the input element of average to update the background color of the elements with the class "secundary" with the average color of the selected image.
-   * @async
-   * @function inputElementAvgChange
-   */
-  inputElementAvg.addEventListener(
-    "change",
-    async function inputElementAvgChange() {
-      setTimeout(async () => {
-        getAverage();
-      }, 10);
-    }
-  );
-</script>
-
-<script>
-  // Get the input element and image element by their IDs
-  const inputElement = document.getElementById("image-input");
+// inputs dinamicos
   const imageElement = document.getElementById("img") as HTMLImageElement;
-  // Add an event listener to the input element of principal
+  const inputElement = document.getElementById("image-input");
+
   inputElement.addEventListener("change", function () {
-    // Ensure that a file was selected
     if (
-      inputElement instanceof HTMLInputElement &&
-      inputElement.files &&
-      inputElement.files[0]
-    ) {
-      // Get the selected file (should be an image)
-      const selectedFile = inputElement.files[0];
+    inputElement instanceof HTMLInputElement &&
+    inputElement.files &&
+    inputElement.files[0]
+  ) {
+    // Get the selected file (should be an image)
+    const selectedFile = inputElement.files[0];
 
-      // Create a FileReader to read the selected image
-      const reader = new FileReader();
+    // Create a FileReader to read the selected image
+    const reader = new FileReader();
 
-      // Set up the FileReader onload event to update the image src when the file is read
-      reader.onload = function (event) {
-        const src: string = event.target.result as string;
-        imageElement.src = src;
-      };
+    // Set up the FileReader onload event to update the image src when the file is read
+    reader.onload = function (event) {
+      const src: string = event.target.result as string;
+      imageElement.src = src;
+    };
 
-      // Read the selected file as a data URL (base64 encoded string)
-      reader.readAsDataURL(selectedFile);
+    // Read the selected file as a data URL (base64 encoded string)
+    reader.readAsDataURL(selectedFile);
     }
+    setTimeout(async () => {
+      themePrimary.setImg(imageElement.src);
+      themePrimary.getMainColor();
+    }, 100);
+
+
+  
   });
 
-  // Get the input element and image element by their IDs
-  const inputElementAvg = document.getElementById("image-input-avg");
-  const imageElementAvg = document.getElementById("img2") as HTMLImageElement;
-  // Add an event listener to the input element of avg
-  inputElementAvg.addEventListener("change", function () {
-    // Ensure that a file was selected
+  const imageElementSec = document.getElementById("img2") as HTMLImageElement;
+  const inputElementSec = document.getElementById("image-input-avg");
+
+  inputElementSec.addEventListener("change", function () {
     if (
-      inputElementAvg instanceof HTMLInputElement &&
-      inputElementAvg.files &&
-      inputElementAvg.files[0]
-    ) {
-      // Get the selected file (should be an image)
-      const selectedFile = inputElementAvg.files[0];
+    inputElementSec instanceof HTMLInputElement &&
+    inputElementSec.files &&
+    inputElementSec.files[0]
+  ) {
+    // Get the selected file (should be an image)
+    const selectedFile = inputElementSec.files[0];
 
-      // Create a FileReader to read the selected image
-      const reader = new FileReader();
+    // Create a FileReader to read the selected image
+    const reader = new FileReader();
 
-      // Set up the FileReader onload event to update the image src when the file is read
-      reader.onload = function (event) {
-        const src: string = event.target.result as string;
-        imageElementAvg.src = src;
-      };
+    // Set up the FileReader onload event to update the image src when the file is read
+    reader.onload = function (event) {
+      const src: string = event.target.result as string;
+      imageElementSec.src = src;
+    };
 
-      // Read the selected file as a data URL (base64 encoded string)
-      reader.readAsDataURL(selectedFile);
+    // Read the selected file as a data URL (base64 encoded string)
+    reader.readAsDataURL(selectedFile);
     }
+    setTimeout(async () => {
+      themeSecundary.setImg(imageElementSec.src);
+      themeSecundary.getAverageColor();
+    }, 100);
+
+
+  
   });
+
 </script>
